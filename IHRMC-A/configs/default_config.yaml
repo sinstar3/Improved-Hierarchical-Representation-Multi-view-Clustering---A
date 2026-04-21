@@ -1,0 +1,61 @@
+# HRMC 默认配置文件
+
+# 数据集配置
+dataset: 
+  name: "MSRC"
+  data_dir: "./data"
+  normalize_method: l2  # 归一化方法: 'tfidf', 'l2', 'standard', 'minmax', None
+  missing_rate: 0  # 缺失数据比例，范围 [0, 1)
+  missing_mode: "sample"  # 缺失模式: "sample" (样本级), "feature" (特征级)
+  missing_seed: 42  # 缺失视图初始化的种子
+
+# 模型配置 [0.001,0.07,0.1,0.0001]   [70,60,10,2]
+model:
+  # 核心超参数（经常需要调参）
+  lambda1: 0.001    # 网络权重L2正则化系数
+  lambda2: 0.07     # 自表达损失权重
+  lambda3: 0.1    # 张量核范数权重
+  beta: 0.0001       # ADMM 惩罚参数初始值
+  m: 70            # 锚点数
+
+  # 训练控制参数（经常需要调参）
+  max_iters: 100    # ADMM最大迭代次数
+  T: 60             # 自适应权重预热轮数
+  iter_t: 10        # 每个 ADMM 迭代中自编码器的训练轮数
+  batch_size: 1     # 批次大小
+  epochs: 2         # 训练轮数（预训练和主训练共用）
+  lr: 0.0009765625  # 学习率（预训练和主训练共用） (2^-10)
+  
+  # 随机种子
+  random_seed: 42   # 随机种子
+  
+  # 功能开关
+  use_anchor: True  # 是否使用锚点，False表示使用原始HRMC架构 
+  use_adaptive_weight: True # 是否使用自适应权重
+  use_mask: True            # 是否使用缺失数据掩码，True表示使用缺失数据掩码，False表示不使用缺失数据掩码
+  lightweight_mode: True # 轻量级模式：True时不计算损失和可视化，加速训练
+  use_pre_cache: False      # 是否使用预训练缓存，加速重复实验
+  
+  # 模型结构参数
+  hidden_dims: [200, 100]   # 自编码器隐藏层维度
+  latent_dim: 100           # 自编码器潜在表示维度
+
+  # 初始化和处理
+  cv_init_method: 1  # Cv初始化方式，0: 基本SSC(原始X), 1: 零矩阵, 2: 随机矩阵
+  negative_handling: 0  # S矩阵负值处理方法，0: 不处理, 1: 负值置零, 2: 余弦相似度转换
+  
+  # 收敛参数
+  tol: 1e-7         # 收敛容差
+  beta_max: 10      # 惩罚参数最大值
+
+
+# 训练配置
+training:
+  device: "cuda"  # 计算设备 ('cuda' 或 'cpu')
+
+# 输出配置
+output:
+  prefix: "exp"
+  save_results: true
+  save_logs: true
+  generate_plots: true
